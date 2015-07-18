@@ -3,6 +3,7 @@
 import subprocess
 from time import strftime, localtime
 import uuid
+import configparser
 
 # function which generates pretty unique filename
 def mkname():
@@ -17,6 +18,9 @@ def screenshot():
     filename = '/tmp/' + mkname() + ".png"
     subprocess.call(["import", filename])
     return filename
+
+def configurate():
+    pass
 
 def main():
     file = screenshot()
