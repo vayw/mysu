@@ -1,0 +1,20 @@
+[MAIN]
+
+# storage type:
+# supported storages: scp
+
+# [scp]
+# This storage assumes you have configured web server, which will server
+# uploaded files, and passwordless scp connection
+
+# to use this type you need to specify the following values:
+# host = hostname or ip address of storage server
+# path = directory to store uploaded files
+# url = base url (without actual filename) at which the file will be available
+
+storage = scp
+
+[scp]
+host = example.org
+path = /var/www/public/
+url = http://example.org/public/
