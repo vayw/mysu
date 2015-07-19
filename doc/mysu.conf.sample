@@ -13,8 +13,8 @@
 # url = base url (without actual filename) at which the file will be available
 
 storage = scp
+url = http://example.org/public/
 
 [scp]
 host = example.org
 path = /var/www/public/
-url = http://example.org/public/
