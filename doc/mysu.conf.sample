@@ -6,14 +6,18 @@
 # [scp]
 # This storage assumes you have configured web server, which will server
 # uploaded files, and passwordless scp connection
+storage = scp
+
+# you need to set 'url' on which files will be available
+url = http://example.org/public/
+
+# you can set error log path, default: '/tmp/mysu.log'
+log = /tmp/mysu.log
 
 # to use this type you need to specify the following values:
 # host = hostname or ip address of storage server
 # path = directory to store uploaded files
 # url = base url (without actual filename) at which the file will be available
-
-storage = scp
-url = http://example.org/public/
 
 [scp]
 host = example.org
