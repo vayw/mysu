@@ -34,10 +34,12 @@ def config_validator(cfg):
 
     if cfg['main']['storage'] not in storage_types:
         sys.exit('sorry, only this storage types supported: ', storage_types)
-    if 'clipboard_option' in cfg['main']: # if option specified
+    if 'clipboard' in cfg['main']: # if option specified
         # if option value isn't in one of clipboard variants, when warn exit
-        if cfg['main']['clipboard_option'] not in ['primary', 'clipboard']:
-            sys.exit("clipboard_option should be 'primary or 'clipboard'")
+        if cfg['main']['clipboard'] not in ['primary', 'clipboard']:
+            sys.exit("clipboard should be 'primary or 'clipboard'")
+    else:
+        cfg['main']['clipboard'] = 'primary'
     # check if url is set in main section
     if 'url' in cfg['main']:
         # and not empty
@@ -108,7 +110,7 @@ def main():
 
     storage_helper.upload(TMPDIR + file, cfg)
     remove(TMPDIR + file)
-    copy2clipboard(cfg['main']['url'] + file)
+    copy2clipboard(cfg['main']['url'] + file, cfg['main']['clipboard'])
 
 if __name__ == "__main__":
     main()
