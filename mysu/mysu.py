@@ -5,14 +5,15 @@ from time import strftime, localtime
 import uuid
 import configparser
 import argparse
-from os import path
+from os import path, remove
 import sys
+import logging
 
 from storageapi import storage_helper
 
 CONFIG = path.expanduser("~") + "/.config/mysu/mysu.conf"
 TMPDIR = "/tmp/"
-
+DEFAULT_LOG = "/tmp/mysu.log"
 # function which generates pretty unique filename
 def mkname():
     # localtime presented in format "%Y%m%d%M%S"
@@ -67,8 +68,11 @@ def copy2clipboard(buf, clipbrd='primary'):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--screenshot", action="store_true", \
-                        help="capture a part of the screen and share it")
+    parser.add_argument("-a", "--action", required=True, \
+                        help="enter one of action, listed below, to perform: \
+                        \rs - capture a part of the screen and share it")
+    parser.add_argument("-d", "--debug", action="store_true", \
+                        help="write debug to stdout")
     args = parser.parse_args()
     cfg = configparser.ConfigParser()
     if path.isfile(CONFIG):
@@ -78,14 +82,33 @@ def main():
         sys.exit("Probably config file is not valid or doesn't exists,\n\
             \rplease, create " + CONFIG)
 
-    if args.screenshot:
+    # debug output
+    # if debug key is given as argument: print to stdout (no configuration needed
+    if 'log' in cfg['main']:
+        if cfg['main']['log'] == 1:
+            if args.debug:
+                logging.basicConfig(level=logging.DEBUG)
+            # if 'logfile' not specified in config OR empty: set to default
+            elif 'logfile' not in cfg['main'] or not cfg['main']['logfile']:
+                logging.basicConfig(filename=DEFAULT_LOG, filemode='a', level=logging.DEBUG)
+                cfg['main']['logfile'] = DEFAULT_LOG
+            # if 'logfile' specified in user config
+            else:
+                logging.basicConfig(filename=cfg['main']['logfile'], filemode='a', level=logging.DEBUG)
+        else:
+            logging.basicConfig(level=logging.ERROR)
+    else:
+        logging.basicConfig(level=logging.ERROR)
+
+    if args.action == 's':
         file = screenshot()
     else:
-        pass
+        logging.info('choose one of available actions, please')
+        sys.exit()
 
     storage_helper.upload(TMPDIR + file, cfg)
+    remove(TMPDIR + file)
     copy2clipboard(cfg['main']['url'] + file)
-    #print(file)
 
 if __name__ == "__main__":
     main()
