@@ -11,9 +11,19 @@ storage = scp
 # you need to set 'url' on which files will be available
 url = http://example.org/public/
 
+# to log or not to log:
+# 0 - disabled
+# 1 - enabled
+log = 0
 # you can set error log path, default: '/tmp/mysu.log'
-log = /tmp/mysu.log
+logfile = /tmp/mysu.log
 
+# clipboard option
+#  primary: paste with mouse wheel, default
+#  clipboard: paste with ctrl+v
+clipboard = primary
+
+# [scp]
 # to use this type you need to specify the following values:
 # host = hostname or ip address of storage server
 # path = directory to store uploaded files
