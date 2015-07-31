@@ -8,9 +8,6 @@
 # uploaded files, and passwordless scp connection
 storage = scp
 
-# you need to set 'url' on which files will be available
-url = http://example.org/public/
-
 # to log or not to log:
 # 0 - disabled
 # 1 - enabled
@@ -32,3 +29,12 @@ clipboard = primary
 [scp]
 host = example.org
 path = /var/www/public/
+url = http://example.org/public/
+
+# [openstack]
+# version 1.0
+# to use this type you need to specify the following values:
+#     api_host = http://example.org/
+#     user = test_user
+#     key = ExampleKey
+#     container = public

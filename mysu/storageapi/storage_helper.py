@@ -15,5 +15,12 @@ def upload(path, cfg):
         res = scp.scp_put(path, cfg['scp']['host'], cfg['scp']['path'])
         logger.debug('done')
 
+    elif cfg['main']['storage'] == 'openstack':
+        # import scp module
+        from . import openstack
+
+        res = openstack.openstack_put(path, cfg)
+        logger.debug('done')
+
     else:
         logger.debug('not inplemented')

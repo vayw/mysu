@@ -30,7 +30,7 @@ def screenshot():
 
 # this function checks whether all parameters are set
 def config_validator(cfg):
-    storage_types = ['scp']
+    storage_types = ['scp', 'openstack']
 
     if cfg['main']['storage'] not in storage_types:
         sys.exit('sorry, only this storage types supported: ', storage_types)
@@ -40,39 +40,44 @@ def config_validator(cfg):
             sys.exit("clipboard should be 'primary or 'clipboard'")
     else:
         cfg['main']['clipboard'] = 'primary'
-    # check if url is set in main section
-    if 'url' in cfg['main']:
-        # and not empty
-        if not cfg['main']['url']:
-            sys.exit("'url' can't be empty")
-    else:
-        sys.exit("please, set 'url' option in main section of config")
 
     # check options for scp storage
     if cfg['main']['storage'] == 'scp':
-        err = 0 # will by not 0 if we'll find configuration errors
-        required_options = ['host', 'path']
-        for i in required_options:
-            if i in cfg['scp']: # check if required option exists
-                if not cfg['scp'][i]: # check if option isn't empty
-                    print(i, ' in section [scp], cannot be empty..')
-                    err = err + 1
-            else:
-                print(i, ' in section [scp], should be set..')
+        required_options = ['host', 'path', 'url']
+        config_required(required_options, 'scp', cfg)
+
+    if cfg['main']['storage'] == 'openstack':
+        required_options = ['api_host', 'user', 'key', 'url']
+        config_required(required_options, 'openstack', cfg)
+
+def config_required(req, section, cfg):
+    err = 0 # will be not 0 if we'll find configuration errors
+    for i in req:
+        if i in cfg[section]: # check if required option exists
+            if not cfg[section][i]: # check if option isn't empty
+                print(i, ' in section ', section, ' cannot be empty..')
                 err = err + 1
-        if err != 0:
-            sys.exit()
+        else:
+            print(i, ' in section ', section, ' should be set..')
+            err = err + 1
+    if err != 0:
+        sys.exit()
 
 # wrapper to commandline utils, at this moment we use only xclip
-def copy2clipboard(buf, clipbrd='primary'):
+def copy2clipboard(cfg, filename):
+    if cfg['main']['clipboard']:
+        clipbrd = cfg['main']['clipboard']
+    else:
+        clipbrd = 'primary'
     p = subprocess.Popen(['xclip', '-selection', clipbrd], stdin=subprocess.PIPE, close_fds=True)
-    p.communicate(input=buf.encode('utf-8'))
+    fileurl = cfg[cfg['main']['storage']]['url'] + filename
+    p.communicate(input=fileurl.encode('utf-8'))
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--action", required=True, \
                         help="enter one of action, listed below, to perform: \
-                        \rs - capture a part of the screen and share it")
+                        s - capture a part of the screen and share it")
     parser.add_argument("-d", "--debug", action="store_true", \
                         help="write debug to stdout")
     args = parser.parse_args()
@@ -103,14 +108,14 @@ def main():
         logging.basicConfig(level=logging.ERROR)
 
     if args.action == 's':
-        file = screenshot()
+        filename = screenshot()
     else:
         logging.info('choose one of available actions, please')
         sys.exit()
 
-    storage_helper.upload(TMPDIR + file, cfg)
-    remove(TMPDIR + file)
-    copy2clipboard(cfg['main']['url'] + file, cfg['main']['clipboard'])
+    storage_helper.upload(TMPDIR + filename, cfg)
+    remove(TMPDIR + filename)
+    copy2clipboard(cfg, filename)
 
 if __name__ == "__main__":
     main()
