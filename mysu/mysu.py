@@ -23,11 +23,24 @@ def mkname():
     name = a_part + "_" + b_part
     return name
 
+# class for argparse help formatting
+class SmartFormatter(argparse.HelpFormatter):
+    def _split_lines(self, text, width):
+        # this is the RawTextHelpFormatter._split_lines
+        if text.startswith('R|'):
+            return text[2:].splitlines()
+        return argparse.HelpFormatter._split_lines(self, text, width)
+
 def screenshot():
     filename = mkname() + ".png"
     subprocess.call(["import", TMPDIR + filename])
     return filename
 
+def fileupload(arg):
+    if path.exists(arg):
+        return arg
+    else:
+        sys.exit("file doesn't exists!")
 # this function checks whether all parameters are set
 def config_validator(cfg):
     storage_types = ['scp', 'openstack']
@@ -74,10 +87,11 @@ def copy2clipboard(cfg, filename):
     p.communicate(input=fileurl.encode('utf-8'))
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--action", required=True, \
-                        help="enter one of action, listed below, to perform: \
-                        s - capture a part of the screen and share it")
+    parser = argparse.ArgumentParser(formatter_class=SmartFormatter)
+    parser.add_argument("action", help="R|enter one of action, listed below, to perform:\n"
+                            "s - capture a part of the screen and share it \n"
+                            "f - upload file, passed as argument")
+    parser.add_argument("-p", help="filepath to upload, if 'f' action chosen")
     parser.add_argument("-d", "--debug", action="store_true", \
                         help="write debug to stdout")
     args = parser.parse_args()
@@ -109,13 +123,17 @@ def main():
 
     if args.action == 's':
         filename = screenshot()
+        filepath = TMPDIR + filename
+    elif args.action == 'f':
+        filepath = fileupload(args.p)
+        filename = path.basename(args.p)
     else:
         logging.info('choose one of available actions, please')
         sys.exit()
 
-    storage_helper.upload(TMPDIR + filename, cfg)
-    remove(TMPDIR + filename)
+    storage_helper.upload(filepath, cfg)
     copy2clipboard(cfg, filename)
+    if args.action == 's': remove(filepath)
 
 if __name__ == "__main__":
     main()
