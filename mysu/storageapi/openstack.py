@@ -18,17 +18,17 @@ def swift_auth(api_host, user, key):
 
     return (token, management_url)
 
-def openstack_put(path, cfg):
+def openstack_put(path, mimetype, cfg):
     # get auth token
     token_n_url = swift_auth(cfg['openstack']['api_host'], cfg['openstack']['user'], \
                              cfg['openstack']['key'])
     with open(path, 'rb') as inf:
-        img = inf.read()
+        filedata = inf.read()
     # tip container with '\'
     filename = basename(path)
     print(token_n_url[1] + "/" + cfg['openstack']['container'] + "/" + filename)
     put_request = request.Request(token_n_url[1] + "/" + cfg['openstack']['container'] \
-                                    + "/" + filename, data=img, method='PUT')
+                                    + "/" + filename, data=filedata, method='PUT')
     put_request.add_header('X-Auth-Token', token_n_url[0])
-    put_request.add_header('Content-Type', 'image/png')
+    put_request.add_header('Content-Type', mimetype)
     res = request.urlopen(put_request)

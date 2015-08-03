@@ -6,7 +6,6 @@ Helper functions for backend APIs
 import logging
 
 def upload(path, cfg):
-    #logging.basicConfig(filename=cfg['main']['log'], filemode='a', level=logging.DEBUG)
     logger = logging.getLogger(__name__)
     if cfg['main']['storage'] == 'scp':
         # import scp module
@@ -16,10 +15,23 @@ def upload(path, cfg):
         logger.debug('done')
 
     elif cfg['main']['storage'] == 'openstack':
-        # import scp module
+        # import openstack module
         from . import openstack
 
-        res = openstack.openstack_put(path, cfg)
+        if cfg['openstack']['typer'] == 'file':
+            import subprocess
+            bmime = subprocess.check_output(['file', '-b', '--mime-type', path])
+            mime = bmime.decode('utf-8').strip()
+        elif cfg['openstack']['typer'] == 'magic':
+            import magic
+            bmime = magic.from_file(path, mime=True)
+            mime = bmime.decode('utf-8')
+        else:
+            print("unfortunately, this typer isn't implemented")
+            from sys import exit
+            exit()
+
+        res = openstack.openstack_put(path, mime, cfg)
         logger.debug('done')
 
     else:

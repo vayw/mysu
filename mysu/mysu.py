@@ -60,7 +60,7 @@ def config_validator(cfg):
         config_required(required_options, 'scp', cfg)
 
     if cfg['main']['storage'] == 'openstack':
-        required_options = ['api_host', 'user', 'key', 'url']
+        required_options = ['api_host', 'user', 'key', 'url', 'typer']
         config_required(required_options, 'openstack', cfg)
 
 def config_required(req, section, cfg):
